@@ -1,6 +1,6 @@
 
 # VTS-Memory-Compression
-A BepInEx hack for VTube Studio that utilizes HarmonyX and BepInEx (same pair as you'd normally use when modding games like R.E.P.O. or PEAK) that allows the program to load DDS textures if they are present.
+A BepInEx hack for VTube Studio that utilizes HarmonyX and BepInEx (same pair as you'd normally use when modding games like R.E.P.O. or PEAK) that allows VTube Studio to load DDS textures if they are present.
 
 Benchmarks:
 ========
@@ -13,6 +13,12 @@ Uncompressed / BC7 / BC3:
 ![compression_all.png](/Preview_images/compression_all.png)
 Uncompressed / BC7:
 ![compression_bc7.png](/Preview_images/compression_bc7.png)
+
+Requirements:
+========
+* Original copy of [VTube Studio](https://store.steampowered.com/app/1325860/VTube_Studio/).
+* Hardware capable of handling Direct3D 11 (which you need for VTS anyway on PC).
+* DDS textures files (see section below).
 
 Usage:
 ========
