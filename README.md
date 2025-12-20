@@ -9,6 +9,9 @@ Benchmarks:
 * There is virtually no stream or video observable difference when using BC7 compression.
 * DXT5|BC3 introduces gradient degradation.
 
+Image below requires a browser supporting WebP:
+![compression.webp](/Preview_images/compression.webp)
+
 Usage:
 ========
 * Download a new release and extract it.
