@@ -16,7 +16,7 @@ Uncompressed / BC7:
 
 Usage:
 ========
-* Download a new release and extract it.
+* Download a [new release](https://github.com/SuiMachine/VTS-Memory-Compression/releases) and extract it.
 * Drop files in VTube Studio folder.
 * If your model has DDS texture files present in the same folder as color textures, the plugin will try and load them instead!  
 
