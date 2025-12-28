@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36811.4 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTSMemoryCompression", "VTSMemoryCompression.csproj", "{021B8679-1EF0-B7FC-1946-E1E5DF6F8051}"
 EndProject
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D74190D5-302D-4C2C-83CA-741FFF8BFCDC}
+		SolutionGuid = {6C115802-0A68-4A17-9949-1E747AF35EA0}
 	EndGlobalSection
 EndGlobal
