@@ -21,6 +21,8 @@ namespace VTSMemoryCompression
 			Logger.LogInfo($"Patching...");
 			HarmonyInstance.PatchAll();
 			Logger.LogInfo($"Patched!");
+
+			_ = ExporterGO.GetInstance();
 		}
 
 		public static void LogMessage(string text) => LoggerInstance.LogMessage(text);
