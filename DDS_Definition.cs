@@ -142,12 +142,21 @@ namespace VTSMemoryCompression
 		D3D10_RESOURCE_DIMENSION_TEXTURE3D = 4
 	};
 
+	public enum dwFourValues : uint
+	{
+		//Technically these are 5 byte strings
+		DXT1 = 0x31545844,
+		DXT3 = 0x33545844, //Unsupported?
+		DXT5 = 0x35545844,
+		DX10 = 0x30315844
+	}
+
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DDS_PIXELFORMAT
 	{
 		public uint dwSize;         // 32
 		public uint dwFlags;
-		public uint dwFourCC;
+		public dwFourValues dwFourCC;
 		public uint dwRGBBitCount;
 		public uint dwRBitMask;
 		public uint dwGBitMask;
@@ -247,22 +256,94 @@ namespace VTSMemoryCompression
 
 			Texture2D newTexture = null;
 
-			//Has DDS_HEADER_DXT10
-			if ((header.ddspf.dwFlags & 0x00000004) != 0 && header.ddspf.dwFourCC == 0x30315844)
+			uint dwFlag = 0x1 | 0x2 | 0x4;
+			if ((header.ddspf.dwFlags & dwFlag) == 0)
+				return null; //DDSD_CAPS, DDSD_HEIGHT and DDSD_WIDTH as far as I can dig up are always required!
+
+			Plugin.LogMessage($"Format is: {header.ddspf.dwFourCC}");
+			if (header.ddspf.dwFourCC == dwFourValues.DX10)
 			{
 				chunk = new byte[Marshal.SizeOf<DDS_HEADER_DXT10>()];
 				_ = fs.Read(chunk, 0, chunk.Length);
 				handle = GCHandle.Alloc(chunk, GCHandleType.Pinned);
 				try
 				{
-					var DXT10_Header = Marshal.PtrToStructure<DDS_HEADER_DXT10>(handle.AddrOfPinnedObject());
+					DDS_HEADER_DXT10 DXT10_Header = Marshal.PtrToStructure<DDS_HEADER_DXT10>(handle.AddrOfPinnedObject());
 
 					GraphicsFormat? unityFormat = DXT10_Header.dxgiFormat switch
 					{
 						DXGI_FORMAT.DXGI_FORMAT_BC7_UNORM => GraphicsFormat.RGBA_BC7_UNorm,
-						DXGI_FORMAT.DXGI_FORMAT_BC7_TYPELESS or DXGI_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB => GraphicsFormat.RGBA_BC7_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB => GraphicsFormat.RGBA_BC7_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC7_TYPELESS => GraphicsFormat.RGBA_BC7_SRGB, //This might be incorrect
 						DXGI_FORMAT.DXGI_FORMAT_BC3_UNORM => GraphicsFormat.RGBA_DXT5_UNorm,
-						DXGI_FORMAT.DXGI_FORMAT_BC3_UNORM_SRGB or DXGI_FORMAT.DXGI_FORMAT_BC3_TYPELESS => GraphicsFormat.RGBA_DXT5_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC3_UNORM_SRGB => GraphicsFormat.RGBA_DXT5_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC3_TYPELESS => GraphicsFormat.RGBA_DXT5_SRGB, //unknown?
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32A32_TYPELESS => GraphicsFormat.R32G32B32A32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32A32_FLOAT => GraphicsFormat.R32G32B32A32_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32A32_UINT => GraphicsFormat.R32G32B32A32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32A32_SINT => GraphicsFormat.R32G32B32A32_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32_TYPELESS => GraphicsFormat.R32G32B32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32_FLOAT => GraphicsFormat.R32G32B32A32_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32_UINT => GraphicsFormat.R32G32B32A32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32B32_SINT => GraphicsFormat.R32G32B32A32_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_TYPELESS => GraphicsFormat.R16G16B16A16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_FLOAT => GraphicsFormat.R16G16B16A16_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_UNORM => GraphicsFormat.R16G16B16A16_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_UINT => GraphicsFormat.R16G16B16A16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_SNORM => GraphicsFormat.R16G16B16A16_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16B16A16_SINT => GraphicsFormat.R16G16B16A16_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32_TYPELESS => GraphicsFormat.R32G32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32_FLOAT => GraphicsFormat.R32G32_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32_UINT => GraphicsFormat.R32G32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32G32_SINT => GraphicsFormat.R32G32_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_TYPELESS => GraphicsFormat.R8G8B8A8_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM => GraphicsFormat.R8G8B8A8_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM_SRGB => GraphicsFormat.R8G8B8A8_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_UINT => GraphicsFormat.R8G8B8A8_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_SNORM => GraphicsFormat.R8G8B8A8_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8B8A8_SINT => GraphicsFormat.R8G8B8A8_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_TYPELESS => GraphicsFormat.R16G16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_FLOAT => GraphicsFormat.R16G16_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_UNORM => GraphicsFormat.R16G16_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_UINT => GraphicsFormat.R16G16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_SNORM => GraphicsFormat.R16G16_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16G16_SINT => GraphicsFormat.R16G16_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32_TYPELESS => GraphicsFormat.R32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_D32_FLOAT => GraphicsFormat.D32_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R32_FLOAT => GraphicsFormat.R32_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_R32_UINT => GraphicsFormat.R32_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R32_SINT => GraphicsFormat.R32_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_D24_UNORM_S8_UINT => GraphicsFormat.D24_UNorm_S8_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8_TYPELESS => GraphicsFormat.R8G8_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8_UNORM => GraphicsFormat.R8G8_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8_UINT => GraphicsFormat.R8G8_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8_SNORM => GraphicsFormat.R8G8_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8G8_SINT => GraphicsFormat.R8G8_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16_TYPELESS => GraphicsFormat.R16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16_FLOAT => GraphicsFormat.R16_SFloat,
+						DXGI_FORMAT.DXGI_FORMAT_D16_UNORM => GraphicsFormat.D16_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16_UNORM => GraphicsFormat.R16_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16_UINT => GraphicsFormat.R16_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R16_SNORM => GraphicsFormat.R16_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R16_SINT => GraphicsFormat.R16_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8_TYPELESS => GraphicsFormat.R8_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8_UNORM => GraphicsFormat.R8_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8_UINT => GraphicsFormat.R8_UInt,
+						DXGI_FORMAT.DXGI_FORMAT_R8_SNORM => GraphicsFormat.R8_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_R8_SINT => GraphicsFormat.R8_SInt,
+						DXGI_FORMAT.DXGI_FORMAT_BC1_TYPELESS => GraphicsFormat.RGBA_DXT1_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC1_UNORM => GraphicsFormat.RGBA_DXT1_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC1_UNORM_SRGB => GraphicsFormat.RGBA_DXT1_SRGB,
+						DXGI_FORMAT.DXGI_FORMAT_BC4_TYPELESS => GraphicsFormat.R_BC4_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC4_UNORM => GraphicsFormat.R_BC4_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC4_SNORM => GraphicsFormat.R_BC4_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC5_TYPELESS => GraphicsFormat.RG_BC5_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC5_UNORM => GraphicsFormat.RG_BC5_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC5_SNORM => GraphicsFormat.RG_BC5_SNorm,
+						DXGI_FORMAT.DXGI_FORMAT_B5G6R5_UNORM => GraphicsFormat.B5G6R5_UNormPack16,
+						DXGI_FORMAT.DXGI_FORMAT_B5G5R5A1_UNORM => GraphicsFormat.B5G5R5A1_UNormPack16,
+						DXGI_FORMAT.DXGI_FORMAT_B8G8R8A8_UNORM => GraphicsFormat.B8G8R8A8_UNorm,
+						DXGI_FORMAT.DXGI_FORMAT_BC6H_TYPELESS or DXGI_FORMAT.DXGI_FORMAT_BC6H_UF16 or DXGI_FORMAT.DXGI_FORMAT_BC6H_SF16 => null, //Likely never!
 						_ => null
 					};
 
@@ -285,9 +366,19 @@ namespace VTSMemoryCompression
 					handle.Free();
 				}
 			}
-			else if ((header.ddspf.dwFlags & 0x00000004) != 0 && header.ddspf.dwFourCC == 0x35545844) // BC3
+			else
 			{
-				newTexture = new Texture2D((int)header.dwWidth, (int)header.dwHeight, TextureFormat.DXT5, (int)header.dwMipMapCount, false, true);
+				switch (header.ddspf.dwFourCC)
+				{
+					case dwFourValues.DXT1:
+						newTexture = new Texture2D((int)header.dwWidth, (int)header.dwHeight, TextureFormat.DXT1, (int)header.dwMipMapCount, false, true);
+						break;
+					case dwFourValues.DXT5:
+						newTexture = new Texture2D((int)header.dwWidth, (int)header.dwHeight, TextureFormat.DXT5, (int)header.dwMipMapCount, false, true);
+						break;
+					default:
+						return null;
+				}
 			}
 
 			if (newTexture != null)
