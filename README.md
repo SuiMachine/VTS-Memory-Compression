@@ -4,10 +4,10 @@ A BepInEx hack for VTube Studio that utilizes HarmonyX and BepInEx (same pair as
 
 Benchmarks:
 ========
-* Loading 16k DDS texture in tests turned out to be **~3x as fast** as loading a PNG file.
-* After loading to VRAM, both BC3 and BC7 compressed textures took **~4x less graphics card's memory** than original PNG texture (from 1.33GB down to 0.34GB) - this is due to VTube Studio using ARGB32 format after decoding a texture.
-* There is virtually no stream or video observable difference when using BC7 compression.
-* DXT5|BC3 introduces gradient degradation.
+* Loading DDS BC7 textures turned out to be 6x-22x faster than PNG files (likely the difference might be attributed to deflate compression that PNG files can have)!
+* After loading to VRAM, both BC3 and BC7 compressed textures took **4x less graphics card's memory** than original PNG texture (from 1.33GB down to 0.34GB) - this is due to VTube Studio using ARGB32 format after decoding a texture.
+* There is almost no stream or video observable difference when using BC7 compression, unless the model have very low pixel density.
+* DXT5|BC3 introduces noticeable gradient degradation in many cases.
 
 Uncompressed / BC7 / BC3:
 ![compression_all.png](/Preview_images/compression_all.png)
