@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 
@@ -10,6 +8,7 @@ namespace VTSMemoryCompression.Hook
 	[HarmonyPatch]
 	public static class CubismTextureReplacerHook
 	{
+#if BENCHMARK
 		public static Dictionary<int, List<TimeSpan>> BenchmarkValues = new Dictionary<int, List<TimeSpan>>();
 
 		//[HarmonyPrefix]
@@ -55,7 +54,7 @@ namespace VTSMemoryCompression.Hook
 			return false;
 		}
 
-
+		
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(IOHelper), "CubismLoadAssetFromStreamingAssets")]
 		public static bool CubismLoadAssetFromStreamingAssetsDetour(ref object __result, Type assetType, string absolutePath)
@@ -106,5 +105,36 @@ namespace VTSMemoryCompression.Hook
 
 			return true;
 		}
+#else
+		[HarmonyPrefix]
+		[HarmonyPatch(typeof(IOHelper), "CubismLoadAssetFromStreamingAssets")]
+		public static bool CubismLoadAssetFromStreamingAssetsDetour(ref object __result, Type assetType, string absolutePath)
+		{
+			if (assetType != typeof(Texture2D))
+				return true;
+
+			var directory = Directory.GetParent(absolutePath).FullName;
+			var fileName = Path.GetFileNameWithoutExtension(absolutePath) + ".dds";
+
+			var fullPath = Path.Combine(directory, fileName);
+			if (File.Exists(fullPath))
+			{
+				Plugin.LogMessage($"Trying to load replacement: {fullPath}");
+				Texture2D createdTexture = DDS_Util.LoadTexture(fullPath);
+
+				//True allows for old code to be executed, false prevents it
+				if (createdTexture != null)
+				{
+					__result = createdTexture;
+					GC.Collect();
+					return false;
+				}
+				else
+					return true;
+			}
+
+			return true;
+		}
+#endif
 	}
 }
