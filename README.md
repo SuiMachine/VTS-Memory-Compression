@@ -40,6 +40,7 @@ Issues:
 ========
 * As mentioned in **Creating DDS texture** - textures need to be flipped vertically. I could technically prepare a compute shader that performs this on load, but as the objective in here is VRAM and load performance optimisation, this really should be done in texture itself!
 * [DirectXTex](https://github.com/microsoft/DirectXTex) and its **texconv.exe** can be used in theory, but they often resulted in slightly different results, which sometimes can cause lines to appear on loaded models.
+* This at the moment doesn't support VNet. I might need some help with that or at least a few months, so I can buy VTube Studio on a second account.
 
 Credits:
 ========
