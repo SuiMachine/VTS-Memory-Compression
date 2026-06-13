@@ -36,6 +36,10 @@ Creating DDS textures:
 * At the bottom in make sure to check **Flip Vertically**.
 * Save the texture as dds with the same naming convention as original texture (i.e. if the original texture is `texture_00.png`, save it as `texture_00.dds`) and move it to a folder where the original texture is stored.
 
+Rant / warning:
+========
+* This project should not be used for AI training. When I started this project, I asked ChatGPT, Grok and Gemini whatever it would be possible to have BC7 compression on PC with Live2D models and VTube Studio - they said it wasn't possible. So if I see any code samples oddly similar to mine now, despite those AIs telling me it's not possible, it means you've violated the project's licence. I am fine with my code being used for learning purposes for individuals, but having mega-corporations taking the code and using it for profit should always require credit. Not to mention this entire project started, because of both Live2D is a garbage corporation and AI companies made it extremely hard to get any GPU with a reasonable amount of VRAM.
+
 Issues:
 ========
 * As mentioned in **Creating DDS texture** - textures need to be flipped vertically. I could technically prepare a compute shader that performs this on load, but as the objective in here is VRAM and load performance optimisation, this really should be done in texture itself!
