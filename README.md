@@ -1,6 +1,6 @@
 
 # VTS-Memory-Compression
-A BepInEx hack for VTube Studio that utilizes HarmonyX and BepInEx (same pair as you'd normally use when modding games like R.E.P.O. or PEAK) that allows VTube Studio to load DDS textures if they are present.
+A BepInEx hack for VTube Studio that utilizes HarmonyX and BepInEx (same pair as you'd normally use when modding games like R.E.P.O. or PEAK) that allows VTube Studio to load DDS textures if they are present or compress textures to BC3 in runtime.
 
 Benchmarks:
 ========
@@ -17,14 +17,15 @@ Uncompressed / BC7:
 Requirements:
 ========
 * Original copy of [VTube Studio](https://store.steampowered.com/app/1325860/VTube_Studio/).
-* Hardware capable of handling Direct3D 11 (which you need for VTS anyway on PC).
-* DDS textures files (see section below).
+* Hardware capable of handling Direct3D 11 (which you need for VTube Studio anyway on PC).
+* Preferably DDS textures files (see section below), but a runtime BC3 compression offering worse quality is available as well (it saves the same amount of VRAM as BC7)
 
 Usage:
 ========
 * Download a [new release](https://github.com/SuiMachine/VTS-Memory-Compression/releases) and extract it.
 * Drop files in VTube Studio folder.
-* If your model has DDS texture files present in the same folder as color textures, the plugin will try and load them instead!  
+* If your model has DDS texture files present in the same folder as color textures, the plugin will try and load them instead!
+* After launching it once you can also go to **BepInEx/config** and edit **VTSMemoryCompression.cfg** - in it you can enable BC3 runtime compression if needed. See [wiki](https://github.com/SuiMachine/VTS-Memory-Compression/wiki)
 
 Creating DDS textures:
 ========
