@@ -118,6 +118,7 @@ namespace VTSMemoryCompression.Hook
 				//True allows for old code to be executed, false prevents it
 				if (createdTexture != null)
 				{
+					Plugin.LogMessage($"Replaced texture with {createdTexture.format}");
 					__result = createdTexture;
 					GC.Collect();
 					return false;
@@ -125,8 +126,38 @@ namespace VTSMemoryCompression.Hook
 				else
 					return true;
 			}
+			else if (File.Exists(absolutePath))
+			{
+				if (!Plugin.ConfigVariables.RuntimeCompression.Value)
+					return true;
 
-			return true;
+				Texture2D texture2D = new Texture2D(4, 4, TextureFormat.RGBA32, true)
+				{
+					wrapMode = TextureWrapMode.Clamp,
+				};
+
+				if (texture2D.LoadImage(File.ReadAllBytes(absolutePath)))
+				{
+					bool highQuality = Plugin.ConfigVariables.RuntimeCompressionHighQuality.Value;
+					Plugin.LogMessage($"Compressing the texture in runtime ({(highQuality ? "with dithering" : "without dithering")})");
+					texture2D.Compress(highQuality);
+					Plugin.LogMessage($"Compressed to {texture2D.format}");
+					texture2D.Apply(true, true);
+					__result = texture2D;
+					return false;
+				}
+				
+				if(texture2D != null)
+				{
+					Texture2D.Destroy(texture2D);
+					GC.Collect();
+				}
+
+				return true;
+			}
+			else
+				return true;
+
 		}
 #endif
 	}
