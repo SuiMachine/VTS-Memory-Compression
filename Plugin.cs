@@ -10,18 +10,28 @@ namespace VTSMemoryCompression
     {
 		public static ManualLogSource LoggerInstance { get; private set; }
 		public static Harmony HarmonyInstance { get; private set; }
+		public static PluginConfig ConfigVariables { get; private set; }
+
 
 		private void Awake()
         {
 			// Plugin startup logic
 			LoggerInstance = base.Logger;
 			HarmonyInstance = new HarmonyLib.Harmony("local.VTSMemoryCompression.SuiMachine");
-			Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+			ConfigVariables = new PluginConfig(Config);
 
-			Logger.LogInfo($"Patching...");
-			HarmonyInstance.PatchAll();
-			Logger.LogInfo($"Patched!");
+			Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+			if (ConfigVariables.Enabled.Value)
+			{
+				Logger.LogInfo($"Patching...");
+				HarmonyInstance.PatchAll();
+				Logger.LogInfo($"Patched!");
+			}
+			else
+				Logger.LogInfo($"Skipped patching due to config variable...");
 		}
+
+		public static void LogInfo(string text) => LoggerInstance.LogInfo(text);
 
 		public static void LogMessage(string text) => LoggerInstance.LogMessage(text);
 
